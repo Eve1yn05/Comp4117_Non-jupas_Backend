@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Non-JUPAS Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #F0F2F5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 375px;
+            background-color: #F0F2F5;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            padding: 24px 16px;
+        }
+
+        .logo-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+            text-align: center;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background-color: #FFFFFF;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .app-title {
+            font-family: 'Newsreader', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: #1A1A1A;
+        }
+
+        .welcome-text {
+            font-size: 12px;
+            color: #666666;
+            font-weight: normal;
+        }
+
+        .login-card {
+            background-color: #FEFEFE;
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            color: #888888;
+            letter-spacing: 3px;
+        }
+
+        .form-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 16px;
+            height: 40px;
+            background-color: #F8FFFE;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input-wrapper:focus-within {
+            border-color: #0D6E6E;
+        }
+
+        .form-input-wrapper input {
+            flex: 1;
+            border: none;
+            background: none;
+            outline: none;
+            font-size: 14px;
+            color: #1A1A1A;
+            font-family: inherit;
+        }
+
+        .form-input-wrapper input::placeholder {
+            color: #999999;
+        }
+
+        .form-input-icon {
+            font-size: 18px;
+            color: #0D6E6E;
+            flex-shrink: 0;
+        }
+
+        .eye-icon {
+            cursor: pointer;
+            font-size: 18px;
+            color: #0D6E6E;
+            flex-shrink: 0;
+            transition: opacity 0.3s ease;
+            user-select: none;
+        }
+
+        .eye-icon:hover {
+            opacity: 0.7;
+        }
+
+        .remember-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .remember-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox-container {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .checkbox-container input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .checkbox-custom {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #666666;
+            border-radius: 4px;
+            background-color: #F5F5F5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-container input:checked + .checkbox-custom {
+            background-color: #0D6E6E;
+            border-color: #0D6E6E;
+        }
+
+        .checkbox-custom::after {
+            content: '✓';
+            color: #FFFFFF;
+            font-size: 12px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .checkbox-container input:checked + .checkbox-custom::after {
+            opacity: 1;
+        }
+
+        .remember-text {
+            font-size: 13px;
+            color: #1A1A1A;
+            font-weight: normal;
+        }
+
+        .forgot-password {
+            font-size: 13px;
+            color: #0D6E6E;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: normal;
+            transition: opacity 0.3s ease;
+        }
+
+        .forgot-password:hover {
+            opacity: 0.7;
+            text-decoration: underline;
+        }
+
+        .login-button {
+            background-color: #0D6E6E;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 10px;
+            height: 40px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-button:hover:not(:disabled) {
+            background-color: #0a5454;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(13, 110, 110, 0.3);
+        }
+
+        .login-button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .login-button:disabled {
+            background-color: #CCCCCC;
+            cursor: not-allowed;
+        }
+
+        .links-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .link {
+            font-size: 13px;
+            color: #0D6E6E;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: normal;
+            transition: opacity 0.3s ease;
+        }
+
+        .link:hover {
+            opacity: 0.7;
+            text-decoration: underline;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: none;
+            margin-bottom: 16px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background-color: #E8F5E9;
+            color: #2E7D32;
+            border-left: 4px solid #2E7D32;
+        }
+
+        .message.error {
+            background-color: #FFEBEE;
+            color: #C62828;
+            border-left: 4px solid #C62828;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-text {
+            font-size: 12px;
+            color: #C62828;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .error-text.show {
+            display: block;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #FFFFFF;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="content">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <div class="logo">🎓</div>
+                <div class="app-title">Non-JUPAS</div>
+                <div class="welcome-text">Welcome back! Please enter your details.</div>
+            </div>
+
+            <!-- Login Card -->
+            <div class="login-card">
+                <div id="message" class="message"></div>
+
+                <form id="loginForm">
+                    <!-- Email Field -->
+                    <div class="form-group">
+                        <label class="form-label">EMAIL</label>
+                        <div class="form-input-wrapper">
+                            <span class="form-input-icon">✉️</span>
+                            <input 
+                                type="email" 
+                                id="emailInput" 
+                                placeholder="Enter your email" 
+                                required
+                                autocomplete="email"
+                            >
+                        </div>
+                        <div id="emailError" class="error-text"></div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="form-group">
+                        <label class="form-label">PASSWORD</label>
+                        <div class="form-input-wrapper">
+                            <input 
+                                type="password" 
+                                id="passwordInput" 
+                                placeholder="Enter your password" 
+                                required
+                                autocomplete="current-password"
+                            >
+                            <span class="eye-icon" id="togglePasswordBtn">👁️</span>
+                        </div>
+                        <div id="passwordError" class="error-text"></div>
+                    </div>
+
+                    <!-- Remember Me -->
+                    <div class="remember-section">
+                        <label class="remember-left">
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="rememberMe" autocomplete="off">
+                                <div class="checkbox-custom"></div>
+                            </div>
+                            <span class="remember-text">Remember me</span>
+                        </label>
+                        <a href="#" class="forgot-password" id="forgotPasswordLink">Forgot Password?</a>
+                    </div>
+
+                    <!-- Login Button -->
+                    <button type="submit" class="login-button" id="loginButton">Login</button>
+                </form>
+            </div>
+
+            <!-- Links Section -->
+            <div class="links-section">
+                <a href="#" class="link" id="registerLink">New user? Register here</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+        const loginButton = document.getElementById('loginButton');
+        const messageDiv = document.getElementById('message');
+        const emailError = document.getElementById('emailError');
+        const passwordError = document.getElementById('passwordError');
+        const rememberMe = document.getElementById('rememberMe');
+        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        const registerLink = document.getElementById('registerLink');
+
+        // Toggle password visibility
+        togglePasswordBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                togglePasswordBtn.textContent = '👁️‍🗨️';
+            } else {
+                passwordInput.type = 'password';
+                togglePasswordBtn.textContent = '👁️';
+            }
+        });
+
+        // Clear error messages on input
+        emailInput.addEventListener('input', function() {
+            emailError.textContent = '';
+            emailError.classList.remove('show');
+            messageDiv.classList.remove('show');
+        });
+
+        passwordInput.addEventListener('input', function() {
+            passwordError.textContent = '';
+            passwordError.classList.remove('show');
+            messageDiv.classList.remove('show');
+        });
+
+        // Handle form submission
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Clear previous errors
+            emailError.textContent = '';
+            emailError.classList.remove('show');
+            passwordError.textContent = '';
+            passwordError.classList.remove('show');
+            messageDiv.classList.remove('show', 'success', 'error');
+
+            // Validate inputs
+            let isValid = true;
+
+            if (!emailInput.value.trim()) {
+                emailError.textContent = 'Email is required';
+                emailError.classList.add('show');
+                isValid = false;
+            } else if (!isValidEmail(emailInput.value)) {
+                emailError.textContent = 'Please enter a valid email address';
+                emailError.classList.add('show');
+                isValid = false;
+            }
+
+            if (!passwordInput.value.trim()) {
+                passwordError.textContent = 'Password is required';
+                passwordError.classList.add('show');
+                isValid = false;
+            } else if (passwordInput.value.length < 6) {
+                passwordError.textContent = 'Password must be at least 6 characters';
+                passwordError.classList.add('show');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                return;
+            }
+
+            // Disable button and show loading
+            loginButton.disabled = true;
+            const originalText = loginButton.textContent;
+            loginButton.innerHTML = '<span class="loading"></span>';
+
+            // Simulate API call
+            try {
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                // Simulate login logic
+                const loginData = {
+                    email: emailInput.value,
+                    password: passwordInput.value,
+                    rememberMe: rememberMe.checked
+                };
+
+                // In a real app, this would be sent to a backend server
+                console.log('Login attempt:', loginData);
+
+                // Store remember me preference
+                if (rememberMe.checked) {
+                    localStorage.setItem('rememberedEmail', emailInput.value);
+                    localStorage.setItem('rememberMe', 'true');
+                } else {
+                    localStorage.removeItem('rememberedEmail');
+                    localStorage.removeItem('rememberMe');
+                }
+
+                // Show success message
+                showMessage('Login successful! Redirecting...', 'success');
+
+                // Simulate redirect after delay
+                setTimeout(() => {
+                    // In a real app, redirect to dashboard
+                    console.log('Redirecting to dashboard...');
+                }, 2000);
+
+            } catch (error) {
+                showMessage('An error occurred. Please try again.', 'error');
+            } finally {
+                // Re-enable button
+                loginButton.disabled = false;
+                loginButton.textContent = originalText;
+            }
+        });
+
+        // Helper function to validate email
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Helper function to show message
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = `message show ${type}`;
+        }
+
+        // Handle forgot password
+        forgotPasswordLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showMessage('Forgot password functionality coming soon!', 'error');
+        });
+
+        // Handle register link
+        registerLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showMessage('Register functionality coming soon!', 'error');
+        });
+
+        // Load remembered email on page load
+        window.addEventListener('load', function() {
+            if (localStorage.getItem('rememberMe') === 'true') {
+                const rememberedEmail = localStorage.getItem('rememberedEmail');
+                if (rememberedEmail) {
+                    emailInput.value = rememberedEmail;
+                    rememberMe.checked = true;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
