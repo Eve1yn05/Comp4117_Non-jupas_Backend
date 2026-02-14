@@ -1,9 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-const connectDB = require('./utils/db');
+const { connectDB } = require('./utils/db');
 const authRoutes = require('./utils/auth');
 const apiRoutes = require('./routes/api');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -18,7 +19,9 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // Connect to MongoDB
-connectDB();
+(async () => {
+  await connectDB();
+})();
 
 // Routes
 app.get('/', (req, res) => {
