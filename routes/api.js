@@ -33,7 +33,7 @@ router.post('/login', async (req, res) => {
     }
     
     const db = getDB();
-    const user = await db.collection('students').findOne({ 'personal.email': email });
+    const user = await db.collection('users').findOne({ email });
     
     if (!user || !user.password) {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
@@ -45,7 +45,7 @@ router.post('/login', async (req, res) => {
     }
     
     const token = jwt.sign(
-      { id: user._id, email: user.personal.email },
+      { id: user._id, email: user.email },
       process.env.JWT_SECRET || 'your-secret-key',
       { expiresIn: '24h' }
     );
@@ -54,7 +54,7 @@ router.post('/login', async (req, res) => {
       success: true,
       message: 'Login successful',
       token,
-      user: { email: user.personal.email, id: user._id.toString() }
+      user: { email: user.email, id: user._id.toString() }
     });
   } catch (error) {
     console.error('API login error:', error);
@@ -89,7 +89,13 @@ router.post('/signup', async (req, res) => {
     }
     
     const db = getDB();
-    const existingUser = await db.collection('students').findOne({ 'personal.email': email });
+    
+    if (!db) {
+      console.error('Database connection is null');
+      return res.status(500).json({ success: false, error: 'Database connection failed' });
+    }
+    
+    const existingUser = await db.collection('users').findOne({ email });
     
     if (existingUser) {
       return res.status(400).json({ success: false, error: 'Email already registered' });
@@ -97,16 +103,29 @@ router.post('/signup', async (req, res) => {
     
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    const newUser = {
-      personal: { email, name: '' },
+    // Create user in users collection
+    console.log('Creating user document...');
+    const userResult = await db.collection('users').insertOne({
+      email,
       password: hashedPassword,
-      application: { status: 'Pending', applied_at: new Date() }
-    };
+      created_at: new Date()
+    });
+    console.log('User created with ID:', userResult.insertedId);
     
-    const result = await db.collection('students').insertOne(newUser);
+    // Create student profile in students collection
+    console.log('Creating student document...');
+    const studentResult = await db.collection('students').insertOne({
+      personal: { email, name: '' },
+      application: { category: 'Non-JUPAS', status: 'Pending', applied_at: new Date() },
+      academic: {},
+      test_scores: {},
+      records: {},
+      evaluation: {}
+    });
+    console.log('Student created with ID:', studentResult.insertedId);
     
     const token = jwt.sign(
-      { id: result.insertedId, email },
+      { id: userResult.insertedId, email },
       process.env.JWT_SECRET || 'your-secret-key',
       { expiresIn: '24h' }
     );
@@ -115,7 +134,7 @@ router.post('/signup', async (req, res) => {
       success: true,
       message: 'Signup successful',
       token,
-      user: { email, id: result.insertedId.toString() }
+      user: { email, id: userResult.insertedId.toString() }
     });
   } catch (error) {
     console.error('API signup error:', error);
@@ -128,18 +147,18 @@ router.get('/user', verifyToken, async (req, res) => {
   try {
     const db = getDB();
     const { ObjectId } = require('mongodb');
-    const user = await db.collection('students').findOne({ _id: new ObjectId(req.user.id) });
+    const student = await db.collection('students').findOne({ 'personal.email': req.user.email });
     
-    if (!user) {
-      return res.status(404).json({ success: false, error: 'User not found' });
+    if (!student) {
+      return res.status(404).json({ success: false, error: 'Student profile not found' });
     }
     
     res.json({ 
       success: true,
       user: {
-        email: user.personal.email,
-        id: user._id.toString(),
-        name: user.personal.name
+        email: req.user.email,
+        id: req.user.id,
+        name: student.personal.name || ''
       }
     });
   } catch (error) {

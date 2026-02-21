@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const path = require('path');
 const { connectDB } = require('./utils/db');
 const authRoutes = require('./utils/auth');
 const apiRoutes = require('./routes/api');
@@ -12,11 +11,6 @@ const PORT = process.env.PORT || 8000;
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-
-// View engine setup
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
 
 // Connect to MongoDB
 (async () => {
@@ -24,10 +18,6 @@ app.set('views', path.join(__dirname, 'views'));
 })();
 
 // Routes
-app.get('/', (req, res) => {
-  res.render('login');
-});
-
 app.use('/auth', authRoutes);
 
 // API Routes
