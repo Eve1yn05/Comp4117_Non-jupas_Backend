@@ -19,10 +19,10 @@
  * * @param {Object} data - The student's academic data object.
  * @param {number} data.raw_cgpa - The actual GPA earned by the student.
  * @param {number} data.max_cgpa - The maximum GPA scale (e.g., 4.0 or 4.3).
- * @param {number} data.multiplier - The institutional rigor weight (0.9 - 1.1).
+ * @param {number} data.inst_multiplier - The institutional rigor weight (0.95 - 1.30).
  * @param {number} data.rank_bonus - Pre-calculated points based on percentile rank.
- * @param {number} data.c_rel - Number of completed Major-Related credits.
- * @param {number} data.c_total - Total number of elective/major credits attempted.
+ * @param {number} data.related_credits - Number of completed Major-Related credits.
+ * @param {number} data.total_credits - Total number of elective/major credits attempted.
  * * @returns {number} The total calculated Admission Score (0-100), rounded to 2 decimal places.
  * Gemini AI is used in co-creating the algorithm logic
  */
@@ -32,14 +32,14 @@
  * Logic: (GPA Weight 60%) + (Ranking Bonus 20%) + (Specialist Credit 20%)
  */
 export const calculateAdmissionScore = (data) => {
-  const { raw_cgpa, max_cgpa, multiplier, rank_bonus, c_rel, c_total } = data;
+  const { raw_cgpa, max_cgpa, inst_multiplier, rank_bonus, related_credits, total_credits } = data;
 
   // 1. Normalized GPA with Institutional Multiplier (Base 60)
-  const gpaPoints = (raw_cgpa / max_cgpa) * 60 * multiplier;
+  const gpaPoints = (raw_cgpa / max_cgpa) * 60 * inst_multiplier;
 
   // 2. Specialization Ratio (Base 20)
   // Rewards students who use elective credits on related subjects
-  const specialistPoints = (c_rel / c_total) * 20;
+  const specialistPoints = (related_credits / total_credits) * 20;
 
   // 3. Final Sum
   // Total = GPA (weighted) + Rank Bonus + Specialist (weighted)
