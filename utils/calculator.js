@@ -47,3 +47,5 @@ export const calculateAdmissionScore = (data) => {
 
   return parseFloat(totalScore.toFixed(2)); // Return clean number like 86.75
 };
+
+// front end should display the related GPA and other variables quickly when hovered over the final score, for transparency and user understanding of the calculation.

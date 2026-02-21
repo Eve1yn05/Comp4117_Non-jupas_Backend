@@ -4,11 +4,6 @@ const jwt = require('jsonwebtoken');
 const { getDB } = require('./db');
 const router = express.Router();
 
-// GET login page
-router.get('/login', (req, res) => {
-  res.render('login');
-});
-
 // POST login
 router.post('/login', async (req, res) => {
   try {
@@ -19,7 +14,7 @@ router.post('/login', async (req, res) => {
     }
     
     const db = getDB();
-    const user = await db.collection('students').findOne({ 'personal.email': email });
+    const user = await db.collection('users').findOne({ email });
     
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -31,7 +26,7 @@ router.post('/login', async (req, res) => {
     }
     
     const token = jwt.sign(
-      { id: user._id, email: user.personal.email },
+      { id: user._id, email: user.email },
       process.env.JWT_SECRET || 'your-secret-key',
       { expiresIn: '24h' }
     );
@@ -41,11 +36,6 @@ router.post('/login', async (req, res) => {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-});
-
-// GET signup page
-router.get('/signup', (req, res) => {
-  res.render('signup');
 });
 
 // POST signup
@@ -66,7 +56,7 @@ router.post('/signup', async (req, res) => {
     }
     
     const db = getDB();
-    const existingUser = await db.collection('students').findOne({ 'personal.email': email });
+    const existingUser = await db.collection('users').findOne({ email });
     
     if (existingUser) {
       return res.status(400).json({ error: 'Email already registered' });
@@ -74,16 +64,25 @@ router.post('/signup', async (req, res) => {
     
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    const newUser = {
-      personal: { email, name: '' },
+    // Create user in users collection
+    const userResult = await db.collection('users').insertOne({
+      email,
       password: hashedPassword,
-      application: { status: 'Pending', applied_at: new Date() }
-    };
+      created_at: new Date()
+    });
     
-    const result = await db.collection('students').insertOne(newUser);
+    // Create student profile in students collection
+    await db.collection('students').insertOne({
+      personal: { email, name: '' },
+      application: { category: 'Non-JUPAS', status: 'Pending', applied_at: new Date() },
+      academic: {},
+      test_scores: {},
+      records: {},
+      evaluation: {}
+    });
     
     const token = jwt.sign(
-      { id: result.insertedId, email },
+      { id: userResult.insertedId, email },
       process.env.JWT_SECRET || 'your-secret-key',
       { expiresIn: '24h' }
     );

@@ -32,7 +32,7 @@ DeepWiki: For library/API documentation search.
 MongoDB MCP: For AI-assisted database querying and schema analysis.
 3. Testing & Quality Assurance (The "Reliability" Layer)
 Your lab requires a "Three-Tier" testing strategy:
-Backend Testing: Jest (for logic and API endpoints).
+Backend Testing: Jest (for logic and API endpoints). ThunderClient
 Frontend Testing: Vitest (for Vue component unit tests).
 End-to-End (E2E): Playwright (to simulate a real user clicking through the browser).
 
