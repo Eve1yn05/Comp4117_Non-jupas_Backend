@@ -191,6 +191,7 @@
             height: 18px;
             flex-shrink: 0;
             margin-top: 2px;
+            z-index: 1;
         }
 
         .checkbox-container input {
@@ -200,6 +201,7 @@
             height: 100%;
             cursor: pointer;
             margin: 0;
+            z-index: 2;
         }
 
         .checkbox-custom {
@@ -215,6 +217,8 @@
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 1;
         }
 
         .checkbox-container input:checked + .checkbox-custom {
@@ -470,11 +474,11 @@
 
                     <!-- Privacy Policy Checkbox -->
                     <div class="checkbox-section">
-                        <div class="checkbox-container">
+                        <label class="checkbox-container">
                             <input type="checkbox" id="privacyCheckbox" required>
                             <div class="checkbox-custom"></div>
-                        </div>
-                        <label class="checkbox-text">I agree to the Privacy Policy and Terms of Service</label>
+                        </label>
+                        <label for="privacyCheckbox" class="checkbox-text">I agree to the Privacy Policy and Terms of Service</label>
                     </div>
                     <div id="privacyError" class="error-text"></div>
 
@@ -491,7 +495,7 @@
     </div>
 
     <script>
-        const API_BASE_URL = '/api/auth';
+        const API_BASE_URL = '/auth';
         
         const signupForm = document.getElementById('signupForm');
         const emailInput = document.getElementById('emailInput');
@@ -604,7 +608,7 @@
                 emailError.classList.add('show');
                 isValid = false;
             } else if (!isValidEmail(emailInput.value)) {
-                emailError.textContent = 'Please enter a valid Gmail address (e.g., user@gmail.com)';
+                emailError.textContent = 'Please enter a valid email address';
                 emailError.classList.add('show');
                 isValid = false;
             }
@@ -612,16 +616,6 @@
             if (!userTypeInput.value) {
                 userTypeError.textContent = 'Please select a user type';
                 userTypeError.classList.add('show');
-                isValid = false;
-            }
-
-            if (!usernameInput.value.trim()) {
-                usernameError.textContent = 'Username is required';
-                usernameError.classList.add('show');
-                isValid = false;
-            } else if (usernameInput.value.length < 3) {
-                usernameError.textContent = 'Username must be at least 3 characters';
-                usernameError.classList.add('show');
                 isValid = false;
             }
 
@@ -668,15 +662,15 @@
                     },
                     body: JSON.stringify({
                         email: emailInput.value,
-                        username: usernameInput.value,
                         password: passwordInput.value,
+                        confirmPassword: confirmPasswordInput.value,
                         userType: userTypeInput.value
                     })
                 });
 
                 const data = await response.json();
 
-                if (response.ok && data.success) {
+                if (response.ok && data.message) {
                     // Show success message
                     showMessage('Account created successfully! Redirecting to login...', 'success');
 
@@ -686,7 +680,7 @@
                     }, 1500);
 
                 } else {
-                    showMessage(data.message || 'Registration failed. Please try again.', 'error');
+                    showMessage(data.error || data.message || 'Registration failed. Please try again.', 'error');
                 }
 
             } catch (error) {
@@ -701,8 +695,8 @@
 
         // Helper function to validate email
         function isValidEmail(email) {
-            const gmailRegex = /^[^\s@]+@gmail\.com$/;
-            return gmailRegex.test(email);
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
         }
 
         // Helper function to show message

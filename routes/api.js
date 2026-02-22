@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const Application = require('../api/schema/applicationSchema');
 
 // API endpoint for login
 router.post('/login', (req, res) => {
@@ -90,6 +91,82 @@ router.post('/logout', (req, res) => {
     success: true,
     message: 'Logout successful'
   });
+});
+
+// GET all applications
+router.get('/applications', async (req, res) => {
+  try {
+    const applications = await Application.find();
+    res.json({
+      success: true,
+      data: applications
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// GET single application by ID
+router.get('/applications/:id', async (req, res) => {
+  try {
+    const application = await Application.findById(req.params.id);
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        error: 'Application not found'
+      });
+    }
+    res.json({
+      success: true,
+      data: application
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// UPDATE application status
+router.put('/applications/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    
+    if (!['Pending', 'Approved', 'Rejected'].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid status'
+      });
+    }
+    
+    const application = await Application.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+    
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        error: 'Application not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Status updated successfully',
+      data: application
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
 });
 
 module.exports = router;

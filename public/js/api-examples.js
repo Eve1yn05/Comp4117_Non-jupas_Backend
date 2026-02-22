@@ -94,6 +94,11 @@ async function getCurrentUser() {
   }
 }
 
+// VIEW REVIEW PAGE
+function viewReviewPage() {
+  window.location.href = '/auth/review';
+}
+
 // EXAMPLE: Add this to your login form in HTML
 /*
 <form onsubmit="handleLoginSubmit(event)">
@@ -110,4 +115,7 @@ function handleLoginSubmit(event) {
   loginUser(email, password);
 }
 </script>
+
+// To view the review page:
+<button onclick="viewReviewPage()">View Review</button>
 */

@@ -1,17 +1,30 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const session = require('express-session');
 const path = require('path');
 const connectDB = require('./utils/db');
 const authRoutes = require('./utils/auth');
 const apiRoutes = require('./routes/api');
 
 const app = express();
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Session middleware
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24 // 24 hours
+  }
+}));
 
 // View engine setup
 app.set('view engine', 'ejs');
@@ -23,6 +36,15 @@ connectDB();
 // Routes
 app.get('/', (req, res) => {
   res.render('login');
+});
+
+// Direct routes for signup/register
+app.get('/signup', (req, res) => {
+  res.render('signup');
+});
+
+app.get('/register', (req, res) => {
+  res.render('signup');
 });
 
 app.use('/auth', authRoutes);
