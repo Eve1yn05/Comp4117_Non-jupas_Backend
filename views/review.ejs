@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Applications - Review</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        .review-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #ffffff;
+        }
+
+        /* Header Section */
+        .header-row {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .title-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+        }
+
+        .filter-toggle-btn {
+            width: 40px;
+            height: 40px;
+            background-color: #e8e8e8;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: background-color 0.2s;
+        }
+
+        .filter-toggle-btn:hover {
+            background-color: #d0d0d0;
+        }
+
+        .filter-toggle-btn.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #000000;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .sort-btn,
+        .merge-pdf-btn {
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+
+        .sort-btn {
+            width: 40px;
+            height: 40px;
+            background-color: #e8e8e8;
+        }
+
+        .sort-btn:hover {
+            background-color: #d0d0d0;
+        }
+
+        .merge-pdf-btn {
+            width: 120px;
+            height: 40px;
+            background-color: #2196F3;
+            color: white;
+            font-weight: 600;
+        }
+
+        .merge-pdf-btn:hover {
+            background-color: #1976D2;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            gap: 12px;
+            padding: 12px;
+        }
+
+        .table-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            background-color: #ffffff;
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 120px 100px 120px 120px 80px 80px 100px 120px;
+            gap: 0;
+            background-color: #f5f5f5;
+            border-bottom: 2px solid #d0d0d0;
+            padding: 0;
+            height: 48px;
+            align-items: center;
+        }
+
+        .table-header-cell {
+            padding: 12px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #000000;
+            border-right: 1px solid #d0d0d0;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .table-header-cell:last-child {
+            border-right: none;
+        }
+
+        .table-body {
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 120px 100px 120px 120px 80px 80px 100px 120px;
+            gap: 0;
+            border-bottom: 1px solid #e0e0e0;
+            height: auto;
+            align-items: center;
+        }
+
+        .table-row:hover {
+            background-color: #f9f9f9;
+        }
+
+        .table-cell {
+            padding: 12px;
+            font-size: 13px;
+            color: #333333;
+            border-right: 1px solid #e0e0e0;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .table-cell:last-child {
+            border-right: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            width: fit-content;
+        }
+
+        .status-approved {
+            background-color: #C8E6C9;
+            color: #2E7D32;
+        }
+
+        .status-pending {
+            background-color: #FFE0B2;
+            color: #E65100;
+        }
+
+        .status-rejected {
+            background-color: #FFCDD2;
+            color: #C62828;
+        }
+
+        /* Filter Panel */
+        .filter-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none;
+            z-index: 998;
+        }
+
+        .filter-overlay.active {
+            display: block;
+        }
+
+        .filter-panel {
+            position: fixed;
+            right: -520px;
+            top: 0;
+            width: 520px;
+            height: 100%;
+            background-color: #ffffff;
+            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            z-index: 999;
+            transition: right 0.3s ease;
+        }
+
+        .filter-panel.active {
+            right: 0;
+        }
+
+        .filter-header {
+            padding: 24px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .filter-header-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #000000;
+        }
+
+        .filter-close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666666;
+        }
+
+        .filter-content {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: 4px;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-option input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .filter-option label {
+            cursor: pointer;
+            font-size: 13px;
+            color: #333333;
+            flex: 1;
+        }
+
+        .filter-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 24px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .apply-btn,
+        .reset-btn,
+        .cancel-btn {
+            height: 44px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .apply-btn {
+            background-color: #2563EB;
+            color: white;
+        }
+
+        .apply-btn:hover {
+            background-color: #1D4ED8;
+        }
+
+        .reset-btn {
+            background-color: #F1F5F9;
+            color: #000000;
+            border: 1px solid #CBD5E1;
+        }
+
+        .reset-btn:hover {
+            background-color: #E2E8F0;
+        }
+
+        .cancel-btn {
+            background-color: #FFFFFF;
+            color: #000000;
+            border: 1px solid #CBD5E1;
+        }
+
+        .cancel-btn:hover {
+            background-color: #F5F5F5;
+        }
+
+        /* Responsive */
+        /* Search Bar */
+        .search-bar {
+            flex: 1;
+            max-width: 300px;
+            margin: 0 16px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: #2196F3;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .edit-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background-color: #1976D2;
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #da190b;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 16px;
+            background-color: #f5f5f5;
+            border-top: 1px solid #d0d0d0;
+        }
+
+        .pagination-btn {
+            padding: 8px 12px;
+            border: 1px solid #d0d0d0;
+            background-color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background-color: #f0f0f0;
+            border-color: #999;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-btn.active {
+            background-color: #2196F3;
+            color: white;
+            border-color: #2196F3;
+        }
+
+        .pagination-info {
+            font-size: 13px;
+            color: #666;
+            margin: 0 12px;
+        }
+
+        @media (max-width: 768px) {
+            .table-header,
+            .table-row {
+                grid-template-columns: 100px 80px 100px 100px 80px 80px 80px;
+            }
+
+            .filter-panel {
+                width: 100%;
+                right: -100%;
+            }
+
+            .header-row {
+                flex-wrap: wrap;
+            }
+
+            .main-content {
+                flex-direction: column;
+            }
+
+            .search-bar {
+                max-width: 100%;
+                order: 3;
+                flex-basis: 100%;
+                margin-top: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="review-container">
+        <!-- Header Section -->
+        <div class="header-row">
+            <div class="title-section">
+                <button class="filter-toggle-btn" id="filterToggleBtn" title="Toggle Filter">
+                    ≡
+                </button>
+                <h1 class="page-title">Student Applications</h1>
+            </div>
+            <div class="search-bar">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search by name, ID, or institution...">
+            </div>
+            <div class="header-buttons">
+                <button class="sort-btn" id="sortBtn" title="Sort">
+                    ↕
+                </button>
+                <button class="merge-pdf-btn" id="mergePdfBtn">
+                    Merge PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Table Container -->
+            <div class="table-container">
+                <div class="table-header">
+                    <div class="table-header-cell">Student Name</div>
+                    <div class="table-header-cell">ID</div>
+                    <div class="table-header-cell">Institution</div>
+                    <div class="table-header-cell">Programme</div>
+                    <div class="table-header-cell">Band</div>
+                    <div class="table-header-cell">CGPA</div>
+                    <div class="table-header-cell">Status</div>
+                    <div class="table-header-cell">Actions</div>
+                </div>
+                <div class="table-body" id="tableBody">
+                    <!-- Table rows will be populated by JavaScript -->
+                </div>
+                <div class="pagination-container" id="paginationContainer">
+                    <!-- Pagination controls will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Overlay -->
+    <div class="filter-overlay" id="filterOverlay"></div>
+
+    <!-- Filter Panel -->
+    <div class="filter-panel" id="filterPanel">
+        <div class="filter-header">
+            <h2 class="filter-header-title">Filter Applications</h2>
+            <button class="filter-close-btn" id="filterCloseBtn">✕</button>
+        </div>
+
+        <form class="filter-content" id="filterForm" method="GET">
+            <!-- Institution Filter -->
+            <div class="filter-group">
+                <div class="filter-group-title">Institution</div>
+                <div class="filter-option">
+                    <input type="checkbox" id="inst1" name="institutions" value="HKU SPACE">
+                    <label for="inst1">HKU SPACE</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="inst2" name="institutions" value="HKCC">
+                    <label for="inst2">HKCC</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="inst3" name="institutions" value="CIE">
+                    <label for="inst3">CIE</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="inst4" name="institutions" value="IVE">
+                    <label for="inst4">IVE</label>
+                </div>
+            </div>
+
+            <!-- Band Filter -->
+            <div class="filter-group">
+                <div class="filter-group-title">Band</div>
+                <div class="filter-option">
+                    <input type="checkbox" id="band1" name="bands" value="Band 1">
+                    <label for="band1">Band 1</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="band2" name="bands" value="Band 2">
+                    <label for="band2">Band 2</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="band3" name="bands" value="Band 3">
+                    <label for="band3">Band 3</label>
+                </div>
+            </div>
+
+            <!-- CGPA Filter -->
+            <div class="filter-group">
+                <div class="filter-group-title">CGPA Range</div>
+                <div class="filter-option">
+                    <input type="checkbox" id="cgpa1" name="cgpa_ranges" value="3.5-4.0">
+                    <label for="cgpa1">3.5 - 4.0</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="cgpa2" name="cgpa_ranges" value="3.0-3.4">
+                    <label for="cgpa2">3.0 - 3.4</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="cgpa3" name="cgpa_ranges" value="2.5-2.9">
+                    <label for="cgpa3">2.5 - 2.9</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="cgpa4" name="cgpa_ranges" value="Below 2.5">
+                    <label for="cgpa4">Below 2.5</label>
+                </div>
+            </div>
+        </form>
+
+        <div class="filter-footer">
+            <button class="apply-btn" id="applyFilterBtn">Apply Filter</button>
+            <button class="reset-btn" id="resetFilterBtn">Reset</button>
+            <button class="cancel-btn" id="cancelFilterBtn">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Store application data as JSON -->
+    <script type="application/json" id="applicationData">
+      <%= JSON.stringify(applications || []) %>
+    </script>
+
+    <script>
+        // Load data from JSON script tag
+        const allApplications = JSON.parse(document.getElementById('applicationData').textContent);
+        let filteredApplications = [...allApplications];
+        
+        const ITEMS_PER_PAGE = 10;
+        let currentPage = 1;
+
+        // Initialize
+        renderTable();
+        renderPagination();
+
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            filteredApplications = allApplications.filter(app => {
+                return (
+                    (app['Student Name'] && app['Student Name'].toLowerCase().includes(searchTerm)) ||
+                    (app.HKID && app.HKID.toLowerCase().includes(searchTerm)) ||
+                    (app.Institution && app.Institution.toLowerCase().includes(searchTerm))
+                );
+            });
+            currentPage = 1;
+            renderTable();
+            renderPagination();
+        });
+
+        // Render table rows
+        function renderTable() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+
+            if (filteredApplications.length === 0) {
+                tableBody.innerHTML = '<div class="table-row" style="grid-column: 1 / -1; text-align: center;"><div class="table-cell">No applications found</div></div>';
+                return;
+            }
+
+            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            const pageData = filteredApplications.slice(startIndex, endIndex);
+
+            pageData.forEach(app => {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                const statusClass = app.status ? `status-${app.status.toLowerCase()}` : 'status-pending';
+                row.innerHTML = `
+                    <div class="table-cell">${app['Student Name'] || '-'}</div>
+                    <div class="table-cell">${app.HKID || '-'}</div>
+                    <div class="table-cell">${app.Institution || '-'}</div>
+                    <div class="table-cell">${app.Programme || '-'}</div>
+                    <div class="table-cell">${app.Band || '-'}</div>
+                    <div class="table-cell">${app.cGPA || '-'}</div>
+                    <div class="table-cell">
+                        <span class="status-badge ${statusClass}">
+                            ${app.status || 'Pending'}
+                        </span>
+                    </div>
+                    <div class="table-cell">
+                        <div class="action-buttons">
+                            <button class="edit-btn" onclick="editApplication('${app._id || ''}')">Edit</button>
+                            <button class="delete-btn" onclick="deleteApplication('${app._id || ''}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Render pagination
+        function renderPagination() {
+            const container = document.getElementById('paginationContainer');
+            container.innerHTML = '';
+
+            const totalPages = Math.ceil(filteredApplications.length / ITEMS_PER_PAGE);
+            
+            if (totalPages <= 1) return;
+
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'pagination-btn';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.textContent = '← Previous';
+            prevBtn.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                    renderPagination();
+                }
+            };
+            container.appendChild(prevBtn);
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    if (i > 1 && i > currentPage + 2) {
+                        const dots = document.createElement('span');
+                        dots.className = 'pagination-info';
+                        dots.textContent = '...';
+                        container.appendChild(dots);
+                    }
+                    
+                    const pageBtn = document.createElement('button');
+                    pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+                    pageBtn.textContent = i;
+                    pageBtn.onclick = () => {
+                        currentPage = i;
+                        renderTable();
+                        renderPagination();
+                    };
+                    container.appendChild(pageBtn);
+                }
+            }
+
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'pagination-btn';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.textContent = 'Next →';
+            nextBtn.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable();
+                    renderPagination();
+                }
+            };
+            container.appendChild(nextBtn);
+
+            // Info
+            const info = document.createElement('span');
+            info.className = 'pagination-info';
+            info.textContent = `Page ${currentPage} of ${totalPages}`;
+            container.appendChild(info);
+        }
+
+        // Edit application
+        function editApplication(id) {
+            if (!id) {
+                alert('Application ID not found');
+                return;
+            }
+            alert(`Edit functionality will be implemented for application: ${id}`);
+            // TODO: Implement edit functionality (modal form or redirect to edit page)
+        }
+
+        // Delete application
+        function deleteApplication(id) {
+            if (!id) {
+                alert('Application ID not found');
+                return;
+            }
+            if (confirm('Are you sure you want to delete this application?')) {
+                alert(`Delete functionality will be implemented for application: ${id}`);
+                // TODO: Implement delete functionality (API call)
+            }
+        }
+
+        // Filter Panel Toggle
+        const filterToggleBtn = document.getElementById('filterToggleBtn');
+        const filterCloseBtn = document.getElementById('filterCloseBtn');
+        const filterPanel = document.getElementById('filterPanel');
+        const filterOverlay = document.getElementById('filterOverlay');
+        const cancelFilterBtn = document.getElementById('cancelFilterBtn');
+
+        function toggleFilterPanel() {
+            filterPanel.classList.toggle('active');
+            filterOverlay.classList.toggle('active');
+            filterToggleBtn.classList.toggle('active');
+        }
+
+        function closeFilterPanel() {
+            filterPanel.classList.remove('active');
+            filterOverlay.classList.remove('active');
+            filterToggleBtn.classList.remove('active');
+        }
+
+        filterToggleBtn.addEventListener('click', toggleFilterPanel);
+        filterCloseBtn.addEventListener('click', closeFilterPanel);
+        cancelFilterBtn.addEventListener('click', closeFilterPanel);
+        filterOverlay.addEventListener('click', closeFilterPanel);
+
+        // Apply Filter
+        const applyFilterBtn = document.getElementById('applyFilterBtn');
+        applyFilterBtn.addEventListener('click', function() {
+            const form = document.getElementById('filterForm');
+            const formData = new FormData(form);
+            
+            // Build query string
+            const params = new URLSearchParams();
+            for (const [key, value] of formData.entries()) {
+                params.append(key, value);
+            }
+
+            // TODO: Implement filter logic with query parameters
+            alert('Advanced filtering will be implemented');
+            closeFilterPanel();
+        });
+
+        // Reset Filter
+        const resetFilterBtn = document.getElementById('resetFilterBtn');
+        resetFilterBtn.addEventListener('click', function() {
+            document.getElementById('filterForm').reset();
+            filteredApplications = [...allApplications];
+            currentPage = 1;
+            renderTable();
+            renderPagination();
+            closeFilterPanel();
+        });
+
+        // Merge PDF Button
+        const mergePdfBtn = document.getElementById('mergePdfBtn');
+        mergePdfBtn.addEventListener('click', function() {
+            alert('Merge PDF functionality will be implemented');
+            // TODO: Implement PDF merge functionality
+        });
+
+        // Sort Button
+        const sortBtn = document.getElementById('sortBtn');
+        sortBtn.addEventListener('click', function() {
+            alert('Sort functionality will be implemented');
+            // TODO: Implement sort functionality
+        });
+    </script>
+</body>
+</html>
